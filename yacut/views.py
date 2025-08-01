@@ -35,5 +35,6 @@ def index():
 @app.route('/<short_id>')
 def redirect_view(short_id):
     """Вьюфункция для редиректа по короткой ссылке."""
+
     url = URLMap.get(short_id) or abort(404)
     return redirect(url.original)
