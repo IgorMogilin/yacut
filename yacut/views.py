@@ -1,7 +1,5 @@
 from flask import abort, flash, redirect, render_template, url_for
 
-from yacut import db
-
 from . import app
 from .constants import SHORT_LINK_ALREADY_EXIST
 from .forms import URLForm
