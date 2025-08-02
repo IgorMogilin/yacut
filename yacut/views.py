@@ -22,8 +22,7 @@ def index():
             original=form.original_link.data,
             short=custom_id
         )
-        db.session.add(short_url)
-        db.session.commit()
+        URLMap.save(short_url)
         flash(url_for(
             'redirect_view',
             short_id=custom_id,

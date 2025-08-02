@@ -15,7 +15,6 @@ from .constants import (
     SHORT_STANDART_LENGTH,
     COULD_NOT_GENERATE_SHORTLINK
 )
-from .error_handlers import InvalidAPIUsage
 
 
 class URLMap(db.Model):
@@ -44,7 +43,7 @@ class URLMap(db.Model):
             )
             if not cls.get(short_id):
                 return short_id
-        raise InvalidAPIUsage(
+        raise RuntimeError(
             COULD_NOT_GENERATE_SHORTLINK,
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR
         )
@@ -55,9 +54,9 @@ class URLMap(db.Model):
                 len(self.short) > SHORTLINK_MAX_LENGTH
                 or not SHORTLINK_VALID_RE.fullmatch(self.short)
             ):
-                raise InvalidAPIUsage(ERROR_INVALID_CUSTOM_ID)
+                raise ValueError(ERROR_INVALID_CUSTOM_ID)
             if URLMap.get(self.short):
-                raise InvalidAPIUsage(SHORT_LINK_ALREADY_EXIST)
+                raise ValueError(SHORT_LINK_ALREADY_EXIST)
         else:
             self.short = URLMap.get_unique_short_id()
         db.session.add(self)

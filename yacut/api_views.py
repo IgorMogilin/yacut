@@ -3,7 +3,14 @@ from http import HTTPStatus
 from flask import jsonify, request
 
 from . import app
-from .constants import ERROR_ID_NOT_FOUND, ERROR_NO_URL_FIELD, NO_REQUEST_BODY
+from .constants import (
+    ERROR_ID_NOT_FOUND,
+    ERROR_NO_URL_FIELD,
+    NO_REQUEST_BODY,
+    ERROR_INVALID_CUSTOM_ID,
+    SHORT_LINK_ALREADY_EXIST,
+    COULD_NOT_GENERATE_SHORTLINK
+)
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 
@@ -16,7 +23,23 @@ def create_shortlink():
     if 'url' not in data:
         raise InvalidAPIUsage(ERROR_NO_URL_FIELD)
     url_map = URLMap(original=data['url'], short=data.get('custom_id'))
-    url_map.save()
+    try:
+        url_map.save()
+    except ValueError as e:
+        error_message = str(e)
+        if error_message == ERROR_INVALID_CUSTOM_ID:
+            raise InvalidAPIUsage(ERROR_INVALID_CUSTOM_ID)
+        elif error_message == SHORT_LINK_ALREADY_EXIST:
+            raise InvalidAPIUsage(SHORT_LINK_ALREADY_EXIST)
+        raise InvalidAPIUsage(error_message)
+    except RuntimeError as e:
+        if str(e) == COULD_NOT_GENERATE_SHORTLINK:
+            raise InvalidAPIUsage(
+                COULD_NOT_GENERATE_SHORTLINK,
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR
+            )
+        raise InvalidAPIUsage(str(e))
+
     short_url = f"{request.host_url.rstrip('/')}/{url_map.short}"
     return jsonify({
         'url': url_map.original,
@@ -25,10 +48,11 @@ def create_shortlink():
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
-def get_shtortlink_link(short_id):
+def get_shortlink(short_id):
     url = URLMap.get(short_id=short_id)
     if not url:
-        return jsonify({
-            'message': ERROR_ID_NOT_FOUND
-        }), HTTPStatus.NOT_FOUND
+        raise InvalidAPIUsage(
+            ERROR_ID_NOT_FOUND,
+            status_code=HTTPStatus.NOT_FOUND
+        )
     return jsonify({'url': url.original}), HTTPStatus.OK
