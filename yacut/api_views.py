@@ -6,10 +6,7 @@ from . import app
 from .constants import (
     ERROR_ID_NOT_FOUND,
     ERROR_NO_URL_FIELD,
-    NO_REQUEST_BODY,
-    ERROR_INVALID_CUSTOM_ID,
-    SHORT_LINK_ALREADY_EXIST,
-    COULD_NOT_GENERATE_SHORTLINK
+    NO_REQUEST_BODY
 )
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
