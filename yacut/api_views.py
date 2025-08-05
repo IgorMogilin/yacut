@@ -26,19 +26,12 @@ def create_shortlink():
     try:
         url_map.save()
     except ValueError as e:
-        error_message = str(e)
-        if error_message == ERROR_INVALID_CUSTOM_ID:
-            raise InvalidAPIUsage(ERROR_INVALID_CUSTOM_ID) from e
-        elif error_message == SHORT_LINK_ALREADY_EXIST:
-            raise InvalidAPIUsage(SHORT_LINK_ALREADY_EXIST) from e
-        raise InvalidAPIUsage(error_message) from e
+        raise InvalidAPIUsage(str(e)) from e
     except RuntimeError as e:
-        if str(e) == COULD_NOT_GENERATE_SHORTLINK:
-            raise InvalidAPIUsage(
-                COULD_NOT_GENERATE_SHORTLINK,
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR
-            )
-        raise InvalidAPIUsage(str(e))
+        raise InvalidAPIUsage(
+            str(e),
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR
+        ) from e
 
     short_url = f"{request.host_url.rstrip('/')}/{url_map.short}"
     return jsonify({

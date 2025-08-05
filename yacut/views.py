@@ -19,6 +19,9 @@ def index():
         except ValueError as e:
             flash(str(e), 'error')
             return redirect(url_for('index'))
+        except RuntimeError as e:
+            flash(str(e), 'error')
+            return redirect(url_for('index'))
         flash(url_for(
             'redirect_view',
             short_id=short_url.short,
@@ -30,6 +33,5 @@ def index():
 @app.route('/<short_id>')
 def redirect_view(short_id):
     """Вьюфункция для редиректа по короткой ссылке."""
-
     url = URLMap.get(short_id) or abort(404)
     return redirect(url.original)
