@@ -16,17 +16,14 @@ def index():
         )
         try:
             URLMap.save(short_url)
-        except ValueError as e:
+            flash(url_for(
+                'redirect_view',
+                short_id=short_url.short,
+                _external=True
+            ), 'short_link')
+        except (ValueError, RuntimeError) as e:
             flash(str(e), 'error')
             return redirect(url_for('index'))
-        except RuntimeError as e:
-            flash(str(e), 'error')
-            return redirect(url_for('index'))
-        flash(url_for(
-            'redirect_view',
-            short_id=short_url.short,
-            _external=True
-        ), 'short_link')
     return render_template('yacut.html', form=form)
 
 
